@@ -25,7 +25,7 @@ fn setup(mut commands: Commands) {
     commands.spawn((
         RigidBody::Dynamic,
         Collider::ball(0.5),
-        Restitution::coefficient(0.7),
+        Restitution::coefficient(1.7),
         Transform::from_xyz(0.0, 4.0, 0.0),
     ));
 }
