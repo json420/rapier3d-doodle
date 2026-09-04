@@ -113,27 +113,24 @@ fn setup(
         Color::srgb_u8(240, 255, 124),
         Color::srgb_u8(124, 255, 144),
         Color::srgb_u8(255, 144, 124),
-        Color::srgb_u8(124, 144, 255),
-        Color::srgb_u8(240, 255, 124),
-        Color::srgb_u8(124, 255, 144),
-        Color::srgb_u8(255, 144, 124),
     ];
-    for i in -2..3_i32 {
-        for j in -2..3_i32 {
-            for k in 0..8 {
+    for i in -5..6_i32 {
+        for j in -5..6_i32 {
+            for k in 0..16 {
                 commands.spawn((
                     Mesh3d(meshes.add(Cuboid::from_length(1.0))),
                     MeshMaterial3d(materials.add(StandardMaterial {
-                        base_color: colors[k],
+                        base_color: colors[k % 4],
                         //alpha_mode: AlphaMode::Add,
-                        emissive: LinearRgba::from(colors[k]),
+                        emissive: LinearRgba::from(colors[k % 4]),
                         emissive_exposure_weight: 0.8,
                         ..default()
                     })),
-                    Resetable::from_xyz(i as f32 * 8.0, 1.0 + k as f32 * 1.5, j as f32 * 8.0),
+                    Resetable::from_xyz(i as f32 * 4.0, k as f32 * 1.005, j as f32 * 4.0),
                     RigidBody::Dynamic,
+                    Ccd::enabled(),
                     Collider::cuboid(0.5, 0.5, 0.5),
-                    Restitution::coefficient(1.1),
+                    Restitution::coefficient(0.99),
                     Velocity::zero(),
                 ));
             }
@@ -146,11 +143,13 @@ fn setup(
             Player,
             Mesh3d(meshes.add(Cuboid::from_length(USER))),
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-            Resetable::from_xyz(0.0, 15.0, 0.0),
+            Resetable::from_xyz(0.0, 30.0, 0.0),
             RigidBody::Dynamic,
+            Ccd::enabled(),
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
             Velocity::zero(),
-            Restitution::coefficient(1.1),
+            Restitution::coefficient(0.9 ),
+            ColliderMassProperties::Density(4.0),
             LockedAxes::ROTATION_LOCKED,
         ))
         .with_children(|parent| {
