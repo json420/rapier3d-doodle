@@ -58,7 +58,7 @@ fn main() {
             camera_first_person: false,
         })
         .add_systems(Startup, setup)
-        .add_systems(Update, print_ball_altitude)
+        .add_systems(Update, keyboard_input)
         .run();
 }
 
@@ -154,8 +154,28 @@ fn setup(
         });
 }
 
-fn print_ball_altitude(query: Query<&Transform, With<RigidBody>>) {
-    for transform in &query {
-        println!("Ball altitude: {}", transform.translation.y);
+fn keyboard_input(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mut commands: Commands,
+    mut input: ResMut<PlayerInput>,
+) {
+    let up = keyboard.any_pressed([KeyCode::KeyW, KeyCode::ArrowUp]) as i8;
+    let down = keyboard.any_pressed([KeyCode::KeyS, KeyCode::ArrowDown]) as i8;
+    let left = keyboard.any_pressed([KeyCode::KeyA, KeyCode::ArrowLeft]) as i8;
+    let right = keyboard.any_pressed([KeyCode::KeyD, KeyCode::ArrowRight]) as i8;
+    input.throttle = (up - down).into();
+    input.steering = (right - left).into();
+    if keyboard.just_pressed(KeyCode::Space) {
+        input.jump = true;
     }
+    if keyboard.just_pressed(KeyCode::KeyR) {
+        input.reset = true;
+    }
+    if keyboard.just_pressed(KeyCode::F5) {
+        commands.trigger(ToggleCamera)
+    }
+    if keyboard.just_pressed(KeyCode::F11) {
+        commands.trigger(ToggleFullscreen)
+    }
+    println!("{input:?}");
 }
