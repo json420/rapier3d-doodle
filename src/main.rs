@@ -1,11 +1,60 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+const LINEAR_ACCELERATION: f32 = 30.0; // m/s^2
+const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
+const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
+const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
+const JUMP_IMPULSE: f32 = 7.0; // m/s
+const USER: f32 = 1.3; // m [Size of the player block]
+
+#[derive(Component, Deref)]
+struct Resetable {
+    origin: Vec3,
+}
+
+impl Resetable {
+    fn from_xyz(x: f32, y: f32, z: f32) -> (Self, Transform) {
+        (
+            Resetable {
+                origin: Vec3::new(x, y, z),
+            },
+            Transform::from_xyz(x, y, z),
+        )
+    }
+}
+
+#[derive(Component)]
+struct Player;
+
+#[derive(Resource, Deref, DerefMut, Debug)]
+struct PlayerInput {
+    #[deref]
+    throttle: f32,
+    steering: f32,
+    jump: bool,
+    reset: bool,
+    camera_first_person: bool,
+}
+
+#[derive(Event)]
+struct ToggleCamera;
+
+#[derive(Event)]
+struct ToggleFullscreen;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(RapierDebugRenderPlugin::default())
+        .insert_resource(PlayerInput {
+            throttle: 0.0,
+            steering: 0.0,
+            jump: false,
+            reset: false,
+            camera_first_person: false,
+        })
         .add_systems(Startup, setup)
         .add_systems(Update, print_ball_altitude)
         .run();
