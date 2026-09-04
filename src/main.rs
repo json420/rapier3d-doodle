@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    window::{PrimaryWindow, WindowMode},
+};
 use bevy_rapier3d::prelude::*;
 
 const LINEAR_ACCELERATION: f32 = 30.0; // m/s^2
@@ -59,6 +62,8 @@ fn main() {
         })
         .add_systems(Startup, setup)
         .add_systems(Update, (keyboard_input, update_player, reset_world).chain())
+        .add_observer(toggle_camera)
+        .add_observer(toggle_fullscreen)
         .run();
 }
 
@@ -240,5 +245,33 @@ fn reset_world(
             velocity.angular.y = 0.0;
             velocity.angular.z = 0.0;
         }
+    }
+}
+
+fn toggle_camera(
+    _on: On<ToggleCamera>,
+    mut input: ResMut<PlayerInput>,
+    mut query: Query<(&Camera3d, &mut Transform)>,
+) {
+    input.camera_first_person = !input.camera_first_person;
+    for (_camera, mut transform) in &mut query {
+        *transform = if input.camera_first_person {
+            Transform::from_xyz(0.0, 1.0, 0.0).looking_at(Vec3::new(0.0, 1.0, -1.0), Vec3::Y)
+        } else {
+            Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::ZERO, Vec3::Y)
+        };
+    }
+}
+
+fn toggle_fullscreen(
+    _on: On<ToggleFullscreen>,
+    mut query: Query<&mut Window, With<PrimaryWindow>>,
+) {
+    println!("fullscreen");
+    if let Ok(mut window) = query.single_mut() {
+        window.mode = match window.mode {
+            WindowMode::Windowed => WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
+            _ => WindowMode::Windowed,
+        };
     }
 }
