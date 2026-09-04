@@ -67,17 +67,40 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    // The floor
     commands.spawn((
-        Collider::cuboid(100.0, 0.1, 100.0),
-        Transform::from_xyz(0.0, -2.0, 0.0),
+        RigidBody::Fixed,
+        Collider::cylinder(1.0, 100.00),
+        Mesh3d(meshes.add(Cylinder::new(100.0, 1.0))),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: Color::srgb(0.9, 0.7, 0.9),
+            ..default()
+        })),
+        Transform::from_xyz(0.0, -1.0, 0.0),
     ));
 
+    // That bouncey ball
     commands.spawn((
         RigidBody::Dynamic,
         Collider::ball(0.5),
         Restitution::coefficient(1.7),
-        Transform::from_xyz(0.0, 4.0, 0.0),
+        Transform::from_xyz(4.0, 4.0, 0.0),
     ));
+
+    // Some lights!
+    for i in -1..2 {
+        for j in -1..2 {
+            commands.spawn((
+                PointLight {
+                    shadow_maps_enabled: true,
+                    contact_shadows_enabled: true,
+                    intensity: 7_000_000.0,
+                    ..default()
+                },
+                Transform::from_xyz(i as f32 * 35.0, 11.0, j as f32 * 35.0),
+            ));
+        }
+    }
 
     // The player
     commands
@@ -87,7 +110,7 @@ fn setup(
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
             Resetable::from_xyz(0.0, 15.0, 0.0),
             RigidBody::Dynamic,
-            Collider::cuboid(USER, USER, USER),
+            Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
         ))
         .with_children(|parent| {
             parent.spawn((
