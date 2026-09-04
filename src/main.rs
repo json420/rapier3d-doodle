@@ -70,7 +70,7 @@ fn setup(
     // The floor
     commands.spawn((
         RigidBody::Fixed,
-        Collider::cylinder(1.0, 100.00),
+        Collider::cylinder(1.0, 100.0),
         Mesh3d(meshes.add(Cylinder::new(100.0, 1.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.9, 0.7, 0.9),
@@ -99,6 +99,37 @@ fn setup(
                 },
                 Transform::from_xyz(i as f32 * 35.0, 11.0, j as f32 * 35.0),
             ));
+        }
+    }
+
+    // Those stacks of colorfull cubes
+    let colors = [
+        Color::srgb_u8(124, 144, 255),
+        Color::srgb_u8(240, 255, 124),
+        Color::srgb_u8(124, 255, 144),
+        Color::srgb_u8(255, 144, 124),
+        Color::srgb_u8(124, 144, 255),
+        Color::srgb_u8(240, 255, 124),
+        Color::srgb_u8(124, 255, 144),
+        Color::srgb_u8(255, 144, 124),
+    ];
+    for i in -2..3_i32 {
+        for j in -2..3_i32 {
+            for k in 0..8 {
+                commands.spawn((
+                    RigidBody::Dynamic,
+                    Collider::cuboid(0.5, 0.5, 0.5),
+                    Mesh3d(meshes.add(Cuboid::from_length(1.0))),
+                    MeshMaterial3d(materials.add(StandardMaterial {
+                        base_color: colors[k],
+                        //alpha_mode: AlphaMode::Add,
+                        emissive: LinearRgba::from(colors[k]),
+                        emissive_exposure_weight: 0.8,
+                        ..default()
+                    })),
+                    Resetable::from_xyz(i as f32 * 8.0, 1.0 + k as f32 * 1.5, j as f32 * 8.0),
+                ));
+            }
         }
     }
 
