@@ -16,13 +16,15 @@ fn setup(mut commands: Commands) {
         Transform::from_xyz(-3.0, 3.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
     ));
 
-    commands
-        .spawn(Collider::cuboid(100.0, 0.1, 100.0))
-        .insert(Transform::from_xyz(0.0, -2.0, 0.0));
+    commands.spawn((
+        Collider::cuboid(100.0, 0.1, 100.0),
+        Transform::from_xyz(0.0, -2.0, 0.0),
+    ));
 
-    commands
-        .spawn(RigidBody::Dynamic)
-        .insert(Collider::ball(0.5))
-        .insert(Restitution::coefficient(0.7))
-        .insert(Transform::from_xyz(0.0, 4.0, 0.0));
+    commands.spawn((
+        RigidBody::Dynamic,
+        Collider::ball(0.5),
+        Restitution::coefficient(0.7),
+        Transform::from_xyz(0.0, 4.0, 0.0),
+    ));
 }
