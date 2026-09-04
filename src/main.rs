@@ -58,7 +58,7 @@ fn main() {
             camera_first_person: false,
         })
         .add_systems(Startup, setup)
-        .add_systems(Update, (keyboard_input, update_player).chain())
+        .add_systems(Update, (keyboard_input, update_player, reset_world).chain())
         .run();
 }
 
@@ -117,9 +117,6 @@ fn setup(
         for j in -2..3_i32 {
             for k in 0..8 {
                 commands.spawn((
-                    RigidBody::Dynamic,
-                    Collider::cuboid(0.5, 0.5, 0.5),
-                    Restitution::coefficient(1.1),
                     Mesh3d(meshes.add(Cuboid::from_length(1.0))),
                     MeshMaterial3d(materials.add(StandardMaterial {
                         base_color: colors[k],
@@ -129,6 +126,10 @@ fn setup(
                         ..default()
                     })),
                     Resetable::from_xyz(i as f32 * 8.0, 1.0 + k as f32 * 1.5, j as f32 * 8.0),
+                    RigidBody::Dynamic,
+                    Collider::cuboid(0.5, 0.5, 0.5),
+                    Restitution::coefficient(1.1),
+                    Velocity::zero(),
                 ));
             }
         }
@@ -185,9 +186,7 @@ fn update_player(
     mut input: ResMut<PlayerInput>,
     mut query: Query<(&Player, &Transform, &mut Velocity)>,
 ) {
-    println!("update_player");
     for (_player, transform, mut velocity) in &mut query {
-        println!("found one");
         let dt = time.delta_secs();
         if input.throttle == 0.0 {
             velocity.linear.x *= 0.9;
@@ -216,6 +215,30 @@ fn update_player(
         if transform.translation.y < -10.0 {
             println!("fell off world");
             input.reset = true;
+        }
+    }
+}
+
+fn reset_world(
+    mut input: ResMut<PlayerInput>,
+    mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>,
+) {
+    if input.reset {
+        println!("reset");
+        input.reset = false;
+        for (resetable, mut transform, mut velocity) in &mut query {
+            transform.translation.x = resetable.origin.x;
+            transform.translation.y = resetable.origin.y;
+            transform.translation.z = resetable.origin.z;
+            transform.rotation.x = 0.0;
+            transform.rotation.y = 0.0;
+            transform.rotation.z = 0.0;
+            velocity.linear.x = 0.0;
+            velocity.linear.y = 0.0;
+            velocity.linear.z = 0.0;
+            velocity.angular.x = 0.0;
+            velocity.angular.y = 0.0;
+            velocity.angular.z = 0.0;
         }
     }
 }
