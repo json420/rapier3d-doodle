@@ -62,12 +62,11 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands) {
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(-3.0, 3.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
-    ));
-
+fn setup(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+) {
     commands.spawn((
         Collider::cuboid(100.0, 0.1, 100.0),
         Transform::from_xyz(0.0, -2.0, 0.0),
@@ -79,6 +78,23 @@ fn setup(mut commands: Commands) {
         Restitution::coefficient(1.7),
         Transform::from_xyz(0.0, 4.0, 0.0),
     ));
+
+    // The player
+    commands
+        .spawn((
+            Player,
+            Mesh3d(meshes.add(Cuboid::from_length(USER))),
+            MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
+            Resetable::from_xyz(0.0, 15.0, 0.0),
+            RigidBody::Dynamic,
+            Collider::cuboid(USER, USER, USER),
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                Camera3d::default(),
+                Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::ZERO, Vec3::Y),
+            ));
+        });
 }
 
 fn print_ball_altitude(query: Query<&Transform, With<RigidBody>>) {
