@@ -111,6 +111,7 @@ fn setup(
             Resetable::from_xyz(0.0, 15.0, 0.0),
             RigidBody::Dynamic,
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
+            Restitution::coefficient(1.1),
         ))
         .with_children(|parent| {
             parent.spawn((
