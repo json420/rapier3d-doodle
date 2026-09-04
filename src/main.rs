@@ -7,6 +7,7 @@ fn main() {
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
         .add_plugins(RapierDebugRenderPlugin::default())
         .add_systems(Startup, setup)
+        .add_systems(Update, print_ball_altitude)
         .run();
 }
 
@@ -27,4 +28,10 @@ fn setup(mut commands: Commands) {
         Restitution::coefficient(0.7),
         Transform::from_xyz(0.0, 4.0, 0.0),
     ));
+}
+
+fn print_ball_altitude(query: Query<&Transform, With<RigidBody>>) {
+    for transform in &query {
+        println!("Ball altitude: {}", transform.translation.y);
+    }
 }
