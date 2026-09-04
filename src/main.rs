@@ -232,18 +232,12 @@ fn reset_world(
         println!("reset");
         input.reset = false;
         for (resetable, mut transform, mut velocity) in &mut query {
-            transform.translation.x = resetable.origin.x;
-            transform.translation.y = resetable.origin.y;
-            transform.translation.z = resetable.origin.z;
+            transform.translation = resetable.origin;
             transform.rotation.x = 0.0;
             transform.rotation.y = 0.0;
             transform.rotation.z = 0.0;
-            velocity.linear.x = 0.0;
-            velocity.linear.y = 0.0;
-            velocity.linear.z = 0.0;
-            velocity.angular.x = 0.0;
-            velocity.angular.y = 0.0;
-            velocity.angular.z = 0.0;
+            velocity.linear = Vec3::ZERO;
+            velocity.angular = Vec3::ZERO;
         }
     }
 }
