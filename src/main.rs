@@ -58,7 +58,7 @@ fn main() {
             camera_first_person: false,
         })
         .add_systems(Startup, setup)
-        .add_systems(Update, keyboard_input)
+        .add_systems(Update, (keyboard_input, update_player).chain())
         .run();
 }
 
@@ -70,7 +70,7 @@ fn setup(
     // The floor
     commands.spawn((
         RigidBody::Fixed,
-        Collider::cylinder(1.0, 100.0),
+        Collider::cylinder(0.5, 100.0),
         Mesh3d(meshes.add(Cylinder::new(100.0, 1.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.9, 0.7, 0.9),
@@ -143,6 +143,7 @@ fn setup(
             Resetable::from_xyz(0.0, 15.0, 0.0),
             RigidBody::Dynamic,
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
+            Velocity::zero(),
             Restitution::coefficient(1.1),
             LockedAxes::ROTATION_LOCKED,
         ))
@@ -177,5 +178,44 @@ fn keyboard_input(
     if keyboard.just_pressed(KeyCode::F11) {
         commands.trigger(ToggleFullscreen)
     }
-    println!("{input:?}");
+}
+
+fn update_player(
+    time: Res<Time>,
+    mut input: ResMut<PlayerInput>,
+    mut query: Query<(&Player, &Transform, &mut Velocity)>,
+) {
+    println!("update_player");
+    for (_player, transform, mut velocity) in &mut query {
+        println!("found one");
+        let dt = time.delta_secs();
+        if input.throttle == 0.0 {
+            velocity.linear.x *= 0.9;
+            velocity.linear.z *= 0.9;
+        } else {
+            let delta_v = -transform.local_z() * input.throttle * LINEAR_ACCELERATION * dt;
+            velocity.linear.x += delta_v.x;
+            velocity.linear.z += delta_v.z;
+        }
+
+        if input.steering == 0.0 {
+            velocity.angular.y *= 0.7;
+        } else {
+            velocity.angular.y += -input.steering * ANGULAR_ACCELERATION * dt;
+            velocity.angular.y = velocity
+                .angular
+                .y
+                .clamp(-MAX_ANGULAR_SPEED, MAX_ANGULAR_SPEED);
+        }
+
+        if input.jump {
+            input.jump = false; // Clear the jump command
+            velocity.linear.y = JUMP_IMPULSE;
+        }
+
+        if transform.translation.y < -10.0 {
+            println!("fell off world");
+            input.reset = true;
+        }
+    }
 }
