@@ -119,6 +119,7 @@ fn setup(
                 commands.spawn((
                     RigidBody::Dynamic,
                     Collider::cuboid(0.5, 0.5, 0.5),
+                    Restitution::coefficient(1.1),
                     Mesh3d(meshes.add(Cuboid::from_length(1.0))),
                     MeshMaterial3d(materials.add(StandardMaterial {
                         base_color: colors[k],
@@ -133,7 +134,7 @@ fn setup(
         }
     }
 
-    // The player
+    // The "player" (a brown cube)
     commands
         .spawn((
             Player,
