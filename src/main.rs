@@ -112,6 +112,7 @@ fn setup(
             RigidBody::Dynamic,
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
             Restitution::coefficient(1.1),
+            LockedAxes::ROTATION_LOCKED,
         ))
         .with_children(|parent| {
             parent.spawn((
