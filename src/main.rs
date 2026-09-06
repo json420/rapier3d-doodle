@@ -9,9 +9,10 @@ const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
-const BALL_SPEED: f32 = 60.0; // m/s
-const USER: f32 = 1.5; // m [Size of the player block]
-const BALL: f32 = 1.2; // m [Size of projectile]
+const BALL_SPEED: f32 = 100.0; // m/s
+const USER: f32 = 1.4; // m [Size of the player block]
+const BALL: f32 = 1.3; // m [Size of projectile]
+const PILLAR_SPACING: f32 = 2.5;
 
 #[derive(Component, Deref)]
 struct Resetable {
@@ -119,9 +120,9 @@ fn setup(
         Color::srgb_u8(124, 255, 144),
         Color::srgb_u8(255, 144, 124),
     ];
-    for i in -5..6_i32 {
-        for j in -5..6_i32 {
-            for k in 0..24 {
+    for i in -3..4_i32 {
+        for j in -3..4_i32 {
+            for k in 0..42 {
                 commands.spawn((
                     Mesh3d(meshes.add(Cuboid::from_length(1.0))),
                     MeshMaterial3d(materials.add(StandardMaterial {
@@ -131,7 +132,11 @@ fn setup(
                         emissive_exposure_weight: 0.8,
                         ..default()
                     })),
-                    Resetable::from_xyz(i as f32 * 3.0, k as f32 * 1.01, j as f32 * 3.0),
+                    Resetable::from_xyz(
+                        i as f32 * PILLAR_SPACING,
+                        k as f32 * 1.01,
+                        j as f32 * PILLAR_SPACING,
+                    ),
                     RigidBody::Dynamic,
                     Ccd::enabled(),
                     Collider::cuboid(0.5, 0.5, 0.5),
@@ -149,7 +154,7 @@ fn setup(
             Player,
             Mesh3d(meshes.add(Cuboid::from_length(USER))),
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-            Resetable::from_xyz(0.0, 25.1, 0.0),
+            Resetable::from_xyz(17.0, 8.0, 17.0),
             RigidBody::Dynamic,
             Ccd::enabled(),
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
@@ -161,7 +166,7 @@ fn setup(
         .with_children(|parent| {
             parent.spawn((
                 Camera3d::default(),
-                Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::ZERO, Vec3::Y),
+                Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::new(0.0, 3.0, 0.0), Vec3::Y),
             ));
         });
 }
@@ -287,7 +292,7 @@ fn toggle_camera(
         *transform = if input.camera_first_person {
             Transform::from_xyz(0.0, 1.0, 0.0).looking_at(Vec3::new(0.0, 1.0, -1.0), Vec3::Y)
         } else {
-            Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::ZERO, Vec3::Y)
+            Transform::from_xyz(0.0, 3.0, 13.0).looking_at(Vec3::new(0.0, 3.0, 0.0), Vec3::Y)
         };
     }
 }
