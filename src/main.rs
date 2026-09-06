@@ -9,7 +9,9 @@ const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
-const USER: f32 = 1.4; // m [Size of the player block]
+const BALL_SPEED: f32 = 60.0; // m/s
+const USER: f32 = 1.5; // m [Size of the player block]
+const BALL: f32 = 1.2; // m [Size of projectile]
 
 #[derive(Component, Deref)]
 struct Resetable {
@@ -36,6 +38,7 @@ struct PlayerInput {
     throttle: f32,
     steering: f32,
     jump: bool,
+    fire: bool,
     reset: bool,
     camera_first_person: bool,
 }
@@ -57,6 +60,7 @@ fn main() {
             throttle: 0.0,
             steering: 0.0,
             jump: false,
+            fire: false,
             reset: false,
             camera_first_person: false,
         })
@@ -76,6 +80,7 @@ fn setup(
     commands.spawn((
         RigidBody::Fixed,
         Collider::cylinder(0.5, 100.0),
+        Ccd::enabled(),
         Mesh3d(meshes.add(Cylinder::new(100.0, 1.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.9, 0.7, 0.9),
@@ -144,12 +149,12 @@ fn setup(
             Player,
             Mesh3d(meshes.add(Cuboid::from_length(USER))),
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-            Resetable::from_xyz(0.0, 26.0, 0.0),
+            Resetable::from_xyz(0.0, 25.1, 0.0),
             RigidBody::Dynamic,
             Ccd::enabled(),
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
             Velocity::zero(),
-            Restitution::coefficient(0.8    ),
+            Restitution::coefficient(0.8),
             ColliderMassProperties::Density(10.0),
             LockedAxes::ROTATION_LOCKED,
         ))
@@ -175,6 +180,9 @@ fn keyboard_input(
     if keyboard.just_pressed(KeyCode::Space) {
         input.jump = true;
     }
+    if keyboard.just_pressed(KeyCode::KeyF) {
+        input.fire = true;
+    }
     if keyboard.just_pressed(KeyCode::KeyR) {
         input.reset = true;
     }
@@ -188,6 +196,9 @@ fn keyboard_input(
 
 fn update_player(
     time: Res<Time>,
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut input: ResMut<PlayerInput>,
     mut query: Query<(&Player, &Transform, &mut Velocity)>,
 ) {
@@ -215,6 +226,30 @@ fn update_player(
         if input.jump {
             input.jump = false; // Clear the jump command
             velocity.linear.y = JUMP_IMPULSE;
+        }
+        if input.fire {
+            input.fire = false;
+            let mut velocity = Velocity::zero();
+            velocity.linear = -transform.local_z() * BALL_SPEED;
+            velocity.angular.y = 25.0;
+            let origin = transform.translation - (transform.local_z() * 2.0);
+
+            commands.spawn((
+                Mesh3d(meshes.add(Cuboid::new(BALL * 2.0, BALL, BALL * 2.0))),
+                MeshMaterial3d(materials.add(StandardMaterial {
+                    base_color: Color::srgb(0.5, 0.5, 0.5),
+                    //alpha_mode: AlphaMode::Add,
+                    emissive: LinearRgba::from(Color::srgb(0.5, 0.5, 0.5)),
+                    emissive_exposure_weight: 0.8,
+                    ..default()
+                })),
+                RigidBody::Dynamic,
+                Collider::cuboid(BALL, BALL / 2.0, BALL),
+                Transform::from_xyz(origin.x, origin.y, origin.z),
+                velocity,
+                ColliderMassProperties::Density(400.0),
+                Ccd::enabled(),
+            ));
         }
 
         if transform.translation.y < -10.0 {
