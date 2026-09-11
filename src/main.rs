@@ -9,9 +9,9 @@ const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
-const BALL_SPEED: f32 = 100.0; // m/s
+const BALL_SPEED: f32 = 111.0; // m/s
 const USER: f32 = 1.4; // m [Size of the player block]
-const BALL: f32 = 1.3; // m [Size of projectile]
+const BALL: f32 = 2.3; // m [Size of projectile]
 const PILLAR_SPACING: f32 = 2.5;
 
 #[derive(Component, Deref)]
@@ -244,7 +244,7 @@ fn update_player(
                 MeshMaterial3d(materials.add(StandardMaterial {
                     base_color: Color::srgb(0.5, 0.5, 0.5),
                     //alpha_mode: AlphaMode::Add,
-                    emissive: LinearRgba::from(Color::srgb(0.5, 0.5, 0.5)),
+                    emissive: LinearRgba::from(Color::srgb(0.5, 0.5, 0.7)),
                     emissive_exposure_weight: 0.8,
                     ..default()
                 })),
