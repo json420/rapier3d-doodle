@@ -197,6 +197,9 @@ fn keyboard_input(
     if keyboard.just_pressed(KeyCode::F11) {
         commands.trigger(ToggleFullscreen)
     }
+    if keyboard.just_pressed(KeyCode::Escape) {
+        commands.write_message(AppExit::error());
+    }
 }
 
 fn update_player(
