@@ -13,6 +13,7 @@ const BALL_SPEED: f32 = 111.0; // m/s
 const USER: f32 = 1.4; // m [Size of the player block]
 const BALL: f32 = 2.3; // m [Size of projectile]
 const PILLAR_SPACING: f32 = 2.5;
+const FLOOR: f32 = 400.0;
 
 #[derive(Component, Deref)]
 struct Resetable {
@@ -93,9 +94,9 @@ fn setup(
     // The floor
     commands.spawn((
         RigidBody::Fixed,
-        Collider::cylinder(0.5, 100.0),
+        Collider::cylinder(0.5, FLOOR),
         Ccd::enabled(),
-        Mesh3d(meshes.add(Cylinder::new(100.0, 1.0))),
+        Mesh3d(meshes.add(Cylinder::new(FLOOR, 1.0))),
         MeshMaterial3d(materials.add(StandardMaterial {
             base_color: Color::srgb(0.9, 0.7, 0.9),
             ..default()
