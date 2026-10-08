@@ -28,6 +28,19 @@ impl Resetable {
             Transform::from_xyz(x, y, z),
         )
     }
+
+    fn from_transform(transform: Transform) -> (Self, Transform) {
+        (
+            Resetable {
+                origin: Vec3::new(
+                    transform.translation.x,
+                    transform.translation.y,
+                    transform.translation.z,
+                ),
+            },
+            transform,
+        )
+    }
 }
 
 #[derive(Component)]
@@ -154,7 +167,10 @@ fn setup(
             Player,
             Mesh3d(meshes.add(Cuboid::from_length(USER))),
             MeshMaterial3d(materials.add(Color::srgb(0.8, 0.7, 0.6))),
-            Resetable::from_xyz(17.0, 8.0, 17.0),
+            Resetable::from_transform(
+                Transform::from_xyz(17.0, 42.0, 17.0)
+                    .looking_at(Vec3::new(0.0, 42.0, 0.0), Vec3::Y),
+            ),
             RigidBody::Dynamic,
             Ccd::enabled(),
             Collider::cuboid(USER / 2.0, USER / 2.0, USER / 2.0),
