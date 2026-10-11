@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", branch = "main", version = "0.20.0-dev" }
-bevy_rapier3d = { version = "0.37.0", features = ["parallel"], git = "https://github.com/dimforge/rapier.git", branch = "master" }
+bevy = "0.20.0"
+bevy_rapier3d = "0.37.0"
+
 
 # Enable a medium amount of optimization in the dev profile.
 [profile.dev]
