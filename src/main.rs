@@ -79,7 +79,10 @@ fn main() {
             camera_first_person: false,
         })
         .add_systems(Startup, setup)
-        .add_systems(Update, (keyboard_input, update_player, reset_world).chain())
+        .add_systems(
+            Update,
+            (keyboard_input, update_player, find_fallen, reset_world).chain(),
+        )
         .add_observer(toggle_camera)
         .add_observer(toggle_fullscreen)
         .run();
@@ -275,10 +278,16 @@ fn update_player(
                 Ccd::enabled(),
             ));
         }
+    }
+}
 
+fn find_fallen(mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>) {
+    for (resetable, mut transform, mut velocity) in &mut query {
         if transform.translation.y < -10.0 {
-            println!("fell off world");
-            input.reset = true;
+            resetable.reset(&mut transform);
+            velocity.linear = Vec3::ZERO;
+            velocity.linear.y = JUMP_IMPULSE * 4.0;
+            velocity.angular = Vec3::ZERO;
         }
     }
 }
