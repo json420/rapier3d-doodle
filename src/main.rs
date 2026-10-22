@@ -46,9 +46,8 @@ impl Resetable {
 #[derive(Component)]
 struct Player;
 
-#[derive(Resource, Deref, DerefMut, Debug)]
+#[derive(Resource, Debug)]
 struct PlayerInput {
-    #[deref]
     throttle: f32,
     steering: f32,
     jump: bool,
