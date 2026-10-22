@@ -5,7 +5,7 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 
 const LINEAR_ACCELERATION: f32 = 30.0; // m/s^2
-const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
+//const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
@@ -15,32 +15,31 @@ const BALL: f32 = 2.3; // m [Size of projectile]
 const PILLAR_SPACING: f32 = 2.5;
 const FLOOR: f32 = 400.0;
 
-#[derive(Component, Deref)]
+#[derive(Component)]
 struct Resetable {
-    origin: Vec3,
+    translation: Vec3,
+    rotation: Quat,
 }
 
 impl Resetable {
     fn from_xyz(x: f32, y: f32, z: f32) -> (Self, Transform) {
-        (
-            Resetable {
-                origin: Vec3::new(x, y, z),
-            },
-            Transform::from_xyz(x, y, z),
-        )
+        let transform = Transform::from_xyz(x, y, z);
+        Self::from_transform(transform)
     }
 
     fn from_transform(transform: Transform) -> (Self, Transform) {
         (
             Resetable {
-                origin: Vec3::new(
-                    transform.translation.x,
-                    transform.translation.y,
-                    transform.translation.z,
-                ),
+                translation: transform.translation,
+                rotation: transform.rotation,
             },
             transform,
         )
+    }
+
+    fn reset(&self, transform: &mut Transform) {
+        transform.translation = self.translation;
+        transform.rotation = self.rotation;
     }
 }
 
@@ -292,10 +291,7 @@ fn reset_world(
         println!("reset");
         input.reset = false;
         for (resetable, mut transform, mut velocity) in &mut query {
-            transform.translation = resetable.origin;
-            transform.rotation.x = 0.0;
-            transform.rotation.y = 0.0;
-            transform.rotation.z = 0.0;
+            resetable.reset(&mut transform);
             velocity.linear = Vec3::ZERO;
             velocity.angular = Vec3::ZERO;
         }
