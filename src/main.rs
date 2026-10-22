@@ -46,6 +46,9 @@ impl Resetable {
 #[derive(Component)]
 struct Player;
 
+#[derive(Component)]
+struct Ball;
+
 #[derive(Resource, Debug)]
 struct PlayerInput {
     throttle: f32,
@@ -82,6 +85,7 @@ fn main() {
             Update,
             (keyboard_input, update_player, find_fallen, reset_world).chain(),
         )
+        .add_systems(Update, despawn_projectile)
         .add_observer(toggle_camera)
         .add_observer(toggle_fullscreen)
         .run();
@@ -261,6 +265,7 @@ fn update_player(
             let origin = transform.translation - (transform.local_z() * 2.0);
 
             commands.spawn((
+                Ball,
                 Mesh3d(meshes.add(Cuboid::new(BALL * 2.0, BALL, BALL * 2.0))),
                 MeshMaterial3d(materials.add(StandardMaterial {
                     base_color: Color::srgb(0.5, 0.5, 0.5),
@@ -287,6 +292,15 @@ fn find_fallen(mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>) {
             velocity.linear = Vec3::ZERO;
             velocity.linear.y = JUMP_IMPULSE * 4.0;
             velocity.angular = Vec3::ZERO;
+        }
+    }
+}
+
+fn despawn_projectile(mut commands: Commands, mut query: Query<(Entity, &Ball, &Transform)>) {
+    for (entity, _ball, transform) in &mut query {
+        if transform.translation.y < -10.0 {
+            println!("despawn ball");
+            commands.entity(entity).despawn();
         }
     }
 }
