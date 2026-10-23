@@ -1,8 +1,13 @@
+use std::f32::consts::FRAC_PI_2;
+
 use bevy::{
+    input::mouse::AccumulatedMouseMotion,
     prelude::*,
     window::{PrimaryWindow, WindowMode},
 };
 use bevy_rapier3d::prelude::*;
+
+const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
 
 const LINEAR_ACCELERATION: f32 = 30.0; // m/s^2
 const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
@@ -86,6 +91,7 @@ fn main() {
             (keyboard_input, update_player, find_fallen, reset_world).chain(),
         )
         .add_systems(Update, despawn_projectile)
+        .add_systems(Update, mouse_move)
         .add_observer(toggle_camera)
         .add_observer(toggle_fullscreen)
         .run();
@@ -221,6 +227,21 @@ fn keyboard_input(
     }
     if keyboard.just_pressed(KeyCode::Escape) {
         commands.write_message(AppExit::error());
+    }
+}
+
+fn mouse_move(motion: Res<AccumulatedMouseMotion>, mut query: Query<(&Player, &mut Transform)>) {
+    let delta = motion.delta;
+    if delta.x != 0.0 || delta.y != 0.0 {
+        let delta_yaw = -delta.x * 0.003;
+        let delta_pitch = -delta.y * 0.002;
+
+        for (_player, mut transform) in &mut query {
+            let (yaw, pitch, roll) = transform.rotation.to_euler(EulerRot::YXZ);
+            let yaw = yaw + delta_yaw;
+            let pitch = (pitch + delta_pitch).clamp(-PITCH_LIMIT, PITCH_LIMIT);
+            transform.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
+        }
     }
 }
 
