@@ -5,7 +5,7 @@ use bevy::{
 use bevy_rapier3d::prelude::*;
 
 const LINEAR_ACCELERATION: f32 = 30.0; // m/s^2
-//const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
+const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
@@ -13,7 +13,7 @@ const BALL_SPEED: f32 = 111.0; // m/s
 const USER: f32 = 1.4; // m [Size of the player block]
 const BALL: f32 = 2.3; // m [Size of projectile]
 const PILLAR_SPACING: f32 = 2.5;
-const FLOOR: f32 = 400.0;
+const FLOOR: f32 = 300.0;
 
 #[derive(Component)]
 struct Resetable {
@@ -255,7 +255,8 @@ fn update_player(
 
         if input.jump {
             input.jump = false; // Clear the jump command
-            velocity.linear.y = JUMP_IMPULSE;
+            velocity.linear.y =
+                (velocity.linear.y + JUMP_IMPULSE).clamp(-MAX_LINEAR_SPEED, MAX_LINEAR_SPEED);
         }
         if input.fire {
             input.fire = false;
@@ -290,7 +291,7 @@ fn find_fallen(mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>) {
         if transform.translation.y < -10.0 {
             resetable.reset(&mut transform);
             velocity.linear = Vec3::ZERO;
-            velocity.linear.y = JUMP_IMPULSE * 4.0;
+            velocity.linear.y = JUMP_IMPULSE * 5.0;
             velocity.angular = Vec3::ZERO;
         }
     }
