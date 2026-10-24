@@ -1,11 +1,10 @@
-use std::f32::consts::FRAC_PI_2;
-
 use bevy::{
     input::mouse::AccumulatedMouseMotion,
     prelude::*,
-    window::{PrimaryWindow, WindowMode},
+    window::{CursorGrabMode, CursorOptions, PrimaryWindow, WindowMode},
 };
 use bevy_rapier3d::prelude::*;
+use std::f32::consts::FRAC_PI_2;
 
 const PITCH_LIMIT: f32 = FRAC_PI_2 - 0.01;
 
@@ -91,7 +90,7 @@ fn main() {
             (keyboard_input, update_player, find_fallen, reset_world).chain(),
         )
         .add_systems(Update, despawn_projectile)
-        .add_systems(Update, mouse_move)
+        .add_systems(Update, (mouse_move, grab_mouse))
         .add_observer(toggle_camera)
         .add_observer(toggle_fullscreen)
         .run();
@@ -323,6 +322,19 @@ fn despawn_projectile(mut commands: Commands, mut query: Query<(Entity, &Ball, &
         if transform.translation.y < -10.0 {
             println!("despawn ball");
             commands.entity(entity).despawn();
+        }
+    }
+}
+
+fn grab_mouse(keyboard: Res<ButtonInput<KeyCode>>, mut cursor_options: Single<&mut CursorOptions>) {
+    if keyboard.just_pressed(KeyCode::Enter) {
+        println!("enter");
+        if cursor_options.visible {
+            cursor_options.visible = false;
+            cursor_options.grab_mode = CursorGrabMode::Locked;
+        } else {
+            cursor_options.visible = true;
+            cursor_options.grab_mode = CursorGrabMode::None;
         }
     }
 }
