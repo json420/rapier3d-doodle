@@ -13,11 +13,11 @@ const MAX_LINEAR_SPEED: f32 = 30.0; // m/s
 const ANGULAR_ACCELERATION: f32 = 6.5; // radians/s^2
 const MAX_ANGULAR_SPEED: f32 = 2.5; // radians/s
 const JUMP_IMPULSE: f32 = 7.0; // m/s
-const BALL_SPEED: f32 = 111.0; // m/s
+const BALL_SPEED: f32 = 77.0; // m/s
 const USER: f32 = 1.4; // m [Size of the player block]
-const BALL: f32 = 2.3; // m [Size of projectile]
+const BALL: f32 = 2.0; // m [Size of projectile]
 const PILLAR_SPACING: f32 = 2.5;
-const FLOOR: f32 = 300.0;
+const FLOOR: f32 = 200.0;
 
 #[derive(Component)]
 struct Resetable {
@@ -282,15 +282,13 @@ fn update_player(
             input.fire = false;
             let mut velocity = Velocity::zero();
             velocity.linear = -transform.local_z() * BALL_SPEED;
-            velocity.angular.y = 25.0;
+            velocity.angular.y = 13.0;
             let origin = transform.translation - (transform.local_z() * 2.0);
-
             commands.spawn((
                 Ball,
                 Mesh3d(meshes.add(Cuboid::new(BALL * 2.0, BALL, BALL * 2.0))),
                 MeshMaterial3d(materials.add(StandardMaterial {
                     base_color: Color::srgb(0.5, 0.5, 0.5),
-                    //alpha_mode: AlphaMode::Add,
                     emissive: LinearRgba::from(Color::srgb(0.5, 0.5, 0.7)),
                     emissive_exposure_weight: 0.8,
                     ..default()
@@ -320,7 +318,6 @@ fn find_fallen(mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>) {
 fn despawn_projectile(mut commands: Commands, mut query: Query<(Entity, &Ball, &Transform)>) {
     for (entity, _ball, transform) in &mut query {
         if transform.translation.y < -10.0 {
-            println!("despawn ball");
             commands.entity(entity).despawn();
         }
     }
@@ -328,7 +325,6 @@ fn despawn_projectile(mut commands: Commands, mut query: Query<(Entity, &Ball, &
 
 fn grab_mouse(keyboard: Res<ButtonInput<KeyCode>>, mut cursor_options: Single<&mut CursorOptions>) {
     if keyboard.just_pressed(KeyCode::Enter) {
-        println!("enter");
         if cursor_options.visible {
             cursor_options.visible = false;
             cursor_options.grab_mode = CursorGrabMode::Locked;
@@ -377,7 +373,6 @@ fn toggle_fullscreen(
     _on: On<ToggleFullscreen>,
     mut query: Query<&mut Window, With<PrimaryWindow>>,
 ) {
-    println!("fullscreen");
     if let Ok(mut window) = query.single_mut() {
         window.mode = match window.mode {
             WindowMode::Windowed => WindowMode::BorderlessFullscreen(MonitorSelection::Primary),
