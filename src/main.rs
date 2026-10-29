@@ -344,7 +344,6 @@ fn reset_world(
     mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>,
 ) {
     if input.reset {
-        println!("reset");
         input.reset = false;
         for (resetable, mut transform, mut velocity) in &mut query {
             resetable.reset(&mut transform);

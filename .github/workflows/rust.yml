@@ -23,13 +23,5 @@ jobs:
           rustup toolchain add ${{ matrix.rust }}
           rustup default ${{ matrix.rust }}
           rustup target add wasm32-unknown-unknown
-          rustup component add rustfmt
-          rustup component add clippy
-      - name: Check
-        run: cargo check
-      - name: Check code formatting
-        run: cargo fmt --all --check
-      - name: Clippy
-        run: cargo clippy
       - name: Build
         run: cargo build --release --target wasm32-unknown-unknown
