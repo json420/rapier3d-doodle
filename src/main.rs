@@ -341,14 +341,19 @@ fn grab_mouse(keyboard: Res<ButtonInput<KeyCode>>, mut cursor_options: Single<&m
 
 fn reset_world(
     mut input: ResMut<PlayerInput>,
-    mut query: Query<(&Resetable, &mut Transform, &mut Velocity)>,
+    mut commands: Commands,
+    mut resetables: Query<(&Resetable, &mut Transform, &mut Velocity)>,
+    mut projectiles: Query<(Entity, &Ball)>,
 ) {
     if input.reset {
         input.reset = false;
-        for (resetable, mut transform, mut velocity) in &mut query {
+        for (resetable, mut transform, mut velocity) in &mut resetables {
             resetable.reset(&mut transform);
             velocity.linear = Vec3::ZERO;
             velocity.angular = Vec3::ZERO;
+        }
+        for (entity, _ball) in &mut projectiles {
+            commands.entity(entity).despawn();
         }
     }
 }
